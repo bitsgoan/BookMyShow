@@ -23,6 +23,9 @@ public class ShowSeat  extends BaseClass {
     @ManyToOne
     private Seat seat;
 
+    @ManyToOne
+    private Ticket ticket;
+
     @Enumerated(EnumType.ORDINAL)
     private ShowSeatStatus showSeatStatus;
 }

@@ -14,7 +14,7 @@ import java.util.List;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-public class City  extends BaseClass {
+public class City extends BaseClass {
     private String name;
 
     @OneToMany

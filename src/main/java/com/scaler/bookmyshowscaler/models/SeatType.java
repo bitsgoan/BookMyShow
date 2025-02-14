@@ -11,6 +11,6 @@ import lombok.Setter;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-public class SeatType  extends BaseClass {
+public class SeatType extends BaseClass {
     private String name;
 }

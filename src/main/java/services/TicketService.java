@@ -1,20 +1,36 @@
 package services;
 
 import com.scaler.bookmyshowscaler.models.*;
-import lombok.AllArgsConstructor;
+import exceptions.SeatNotAvailableException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 import repositories.ShowRepository;
 import repositories.ShowSeatRepository;
-import java.util.Date;
+import repositories.TicketRepository;
 
+import java.util.Date;
 import java.util.List;
 
-@AllArgsConstructor
+@Service
 public class TicketService {
 
     private ShowRepository showRepository;
     private ShowSeatRepository showSeatRepository;
+    private TicketRepository ticketRepository;
+    private TicketPriceCalculator ticketPriceCalculator;
 
-    public Ticket bookTicket(Long showId, List<Long> showSeatIds){
+    @Autowired
+    public TicketService(ShowRepository showRepository, ShowSeatRepository showSeatRepository, TicketRepository ticketRepository, TicketPriceCalculator ticketPriceCalculator){
+        this.ticketRepository = ticketRepository;
+        this.showRepository = showRepository;
+        this.showSeatRepository = showSeatRepository;
+        this.ticketPriceCalculator = ticketPriceCalculator;
+    }
+
+    @Transactional(isolation = Isolation.SERIALIZABLE)
+    public Ticket bookTicket(Long showId, List<Long> showSeatIds) throws SeatNotAvailableException {
         // 1. Get show from the ID.
         Show show = showRepository.findByIdEquals(showId);
 
@@ -25,7 +41,7 @@ public class TicketService {
         // 4b. Throw and exception if not available.
         for (ShowSeat showSeat : showSeats){
             if (!showSeat.getShowSeatStatus().equals(ShowSeatStatus.AVAILABLE)){
-                throw new RuntimeException("Show seats not available");
+                throw new SeatNotAvailableException("Seats not available for the show.");
             }
         }
 
@@ -40,11 +56,8 @@ public class TicketService {
         ticket.setBookingTime(new Date());
         ticket.setShow(show);
         ticket.setShowSeats(showSeats);
-        ticket.setAmount(TicketPriceCalculator.calculateTicketPrice(showSeats));
-
-
-        // 5. If 4a, then redirect for payments.
-
+        ticket.setAmount(ticketPriceCalculator.calculateTicketPrice(showSeats));
+        ticketRepository.save(ticket);
         return ticket;
     }
 }

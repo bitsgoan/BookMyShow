@@ -3,16 +3,22 @@ package services;
 import com.scaler.bookmyshowscaler.models.Show;
 import com.scaler.bookmyshowscaler.models.ShowSeat;
 import com.scaler.bookmyshowscaler.models.ShowSeatType;
-import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import repositories.ShowSeatTypeRepository;
 
 import java.util.List;
 
-@AllArgsConstructor
+@Service
 public class TicketPriceCalculator {
     private ShowSeatTypeRepository showSeatTypeRepository;
 
-    private double calculateTicketPrice(List<ShowSeat> showSeats) {
+    @Autowired
+    public TicketPriceCalculator(ShowSeatTypeRepository showSeatTypeRepository){
+        this.showSeatTypeRepository = showSeatTypeRepository;
+    }
+
+    public double calculateTicketPrice(List<ShowSeat> showSeats) {
         // 1. GetShowSeatType objects
         Show show = showSeats.getFirst().getShow();
         List<ShowSeatType> showSeatTypes = showSeatTypeRepository.findAllByIdEquals(show);
